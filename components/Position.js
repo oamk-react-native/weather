@@ -7,6 +7,7 @@ export default function Position() {
   const [latitude, setLatitude] = useState(0)
   const [longitude, setLongitde] = useState(0)
   const [message, setMessage] = useState('Retrieving location...')
+  const [isLoading, setIsloading] = useState(true)
 
   useEffect(() => {
     (async() => {
@@ -15,18 +16,18 @@ export default function Position() {
       try {
         if (status !== 'granted') {
           setMessage("Location not permitted.")
-          return 
+
+        } else {      
+          const position = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.High})
+          setLatitude(position.coords.latitude)
+          setLongitde(position.coords.longitude)
+          setMessage('Location retrieved')
         }
-        
-        const position = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.High})
-        setLatitude(position.coords.latitude)
-        setLongitde(position.coords.longitude)
-        setMessage('Location retrieved')
-        
       } catch (error) {
         setMessage("Error retrieving location.")
         console.log(error)
       }
+      setIsloading(false)
     })()
   }, [])
   
@@ -34,7 +35,9 @@ export default function Position() {
     <View>
       <Text style={styles.coords}>{latitude.toFixed(3)},{longitude.toFixed(3)}</Text>
       <Text style={styles.message}>{message}</Text>
-      <Weather latitude={latitude} longitude={longitude} />
+      {isLoading === false && 
+        <Weather latitude={latitude} longitude={longitude} />
+      }
     </View>
   )
 }
